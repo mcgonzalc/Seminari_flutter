@@ -148,7 +148,7 @@ class _BorrarScreenState extends State<BorrarScreen> {
       ),
     );
   }
-  void _showDeleteConfirmation(BuildContext context, String userId, String userName) {
+  void _showDeleteConfirmation(BuildContext context, String userId, String? userName) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

@@ -54,7 +54,7 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  Future<bool> eliminarUsuariPerId (String id) async {
+  Future<bool> eliminarUsuariPerId(String id) async {
     _setLoading(true);
     _setError(null);
     try{

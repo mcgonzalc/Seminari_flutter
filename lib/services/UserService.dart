@@ -52,7 +52,7 @@ class UserService {
     }
   }
 
-  static Future<User> updateUser(String id, User user) async {
+  static Future<bool> updateUser(String? id, User user) async {
     final response = await http.put(
       Uri.parse('$baseUrl/$id'),
       headers: {'Content-Type': 'application/json'},
@@ -60,7 +60,7 @@ class UserService {
     );
 
     if (response.statusCode == 200) {
-      return User.fromJson(jsonDecode(response.body));
+      return true;
     } else {
       throw Exception('Error actualitzant usuari: ${response.statusCode}');
     }

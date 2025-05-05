@@ -1,13 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:seminari_flutter/models/user.dart';
+import 'package:seminari_flutter/provider/user_auth_provider.dart';
+import 'package:seminari_flutter/services/UserService.dart';
+import 'package:seminari_flutter/services/auth_service.dart';
 import '../widgets/Layout.dart';
-import '../services/auth_service.dart';
 
-class PerfilScreen extends StatelessWidget {
+class PerfilScreen extends StatefulWidget {
   const PerfilScreen({super.key});
 
   @override
+  State<PerfilScreen> createState() => _PerfilScreenState();
+}
+
+class _PerfilScreenState extends State<PerfilScreen> {
+  User? userProfile;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    try {
+      final user = Provider.of<UserAuthProvider>(context, listen: false);
+      final userId = user.userId;
+
+      if (userId == null || userId.isEmpty) {
+        setState(() {
+          _error = 'Usuari no autenticat';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final profile = await UserService.getUserById(userId);
+      setState(() {
+        userProfile = profile;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Error carregant perfil: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserAuthProvider>(context);
+
+    if (_isLoading) {
+      return LayoutWrapper(
+        title: 'Perfil',
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_error != null) {
+      return LayoutWrapper(
+        title: 'Perfil',
+        child: Center(child: Text(_error!)),
+      );
+    }
+
+    // Si no tenim perfil carregat, podem mostrar missatge o fallback
+    if (userProfile == null) {
+      return LayoutWrapper(
+        title: 'Perfil',
+        child: const Center(child: Text('No s\'ha trobat l\'usuari')),
+      );
+    }
+
     return LayoutWrapper(
       title: 'Perfil',
       child: SingleChildScrollView(
@@ -26,14 +95,14 @@ class PerfilScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Exemple',
+                    userProfile!.name,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                          fontWeight: FontWeight.bold,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'demo@exemple.com',
+                    userProfile!.email,
                     style: Theme.of(
                       context,
                     ).textTheme.titleMedium?.copyWith(color: Colors.grey),
@@ -51,11 +120,21 @@ class PerfilScreen extends StatelessWidget {
                           _buildProfileItem(
                             context,
                             Icons.badge,
-                            'ID',
-                            '67f8f3103368468b6e9d509c',
+                            'Nom',
+                            userProfile!.name,
                           ),
                           const Divider(),
-                          _buildProfileItem(context, Icons.cake, 'Edat', '22'),
+                          _buildProfileItem(
+                              context, 
+                              Icons.cake, 
+                              'Edat', 
+                              userProfile!.age.toString()),
+                           const Divider(),
+                          _buildProfileItem(
+                              context, 
+                              Icons.email, 
+                              'Correu electrònic', 
+                              userProfile!.email),
                         ],
                       ),
                     ),
@@ -81,12 +160,16 @@ class PerfilScreen extends StatelessWidget {
                             Icons.edit,
                             'Editar Perfil',
                             'Actualitza la teva informació personal',
+                            '/editar',
+                            extra: user.userId,
                           ),
                           _buildSettingItem(
                             context,
                             Icons.lock,
                             'Canviar contrasenya',
                             'Actualitzar la contrasenya',
+                            '/editarcontrasena',
+                            extra: user.userId,
                           ),
                         ],
                       ),
@@ -168,13 +251,22 @@ class PerfilScreen extends StatelessWidget {
     IconData icon,
     String title,
     String subtitle,
-  ) {
+    String route, {
+    Object? extra,
+  }) {
     return ListTile(
       leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
       title: Text(title),
       subtitle: Text(subtitle),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {},
+      onTap: () {
+        Navigator.pop(context);
+        if (extra != null) {
+          context.go(route, extra: extra);
+        } else {
+          context.go(route);
+        }
+      },
     );
   }
 }

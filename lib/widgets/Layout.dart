@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../provider/users_provider.dart';
+import 'package:seminari_flutter/provider/user_auth_provider.dart';
 
 class LayoutWrapper extends StatelessWidget {
   final Widget child;
@@ -15,6 +16,7 @@ class LayoutWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserAuthProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
@@ -63,9 +65,10 @@ class LayoutWrapper extends StatelessWidget {
             '/details'),
           _buildNavItem(
             context, 
-            'Crear usuari', 
-            Icons.person_add, 
-            '/editar'),
+            'Editar perfil', 
+            Icons.person_2, 
+            '/editar',
+            extra: user.userId),
           _buildNavItem(
             context, 
             'Esborrar usuari', 
@@ -102,7 +105,13 @@ class LayoutWrapper extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(BuildContext context, String title, IconData icon, String route) {
+  Widget _buildNavItem(
+    BuildContext context, 
+    String title, 
+    IconData icon, 
+    String route, {
+    Object? extra,
+    }) {
     final bool isSelected = GoRouterState.of(context).uri.toString() == route;
     
     return ListTile(
@@ -128,7 +137,11 @@ class LayoutWrapper extends StatelessWidget {
       ),
       onTap: () {
         Navigator.pop(context);
+        if (extra != null) {
+        context.go(route, extra: extra);
+       } else {
         context.go(route);
+       }
       },
     );
   }

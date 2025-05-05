@@ -1,9 +1,9 @@
 class User {
-  final String? id;
-  final String name;
-  final int age;
-  final String email;
-  final String password;
+  String? id;
+  String name;
+  int age;
+  String email;
+  String password;
 
   User({
     this.id, 
@@ -15,7 +15,7 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['_id'], 
+      id: json['id'], 
       name: json['name'] ?? '',
       age: json['age'] ?? 0,
       email: json['email'] ?? '',

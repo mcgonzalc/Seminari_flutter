@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:seminari_flutter/services/auth_service.dart';
 import 'package:seminari_flutter/screens/auth/login_screen.dart';
 import 'package:seminari_flutter/screens/home_screen.dart';
+import 'package:seminari_flutter/provider/user_auth_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,15 +14,16 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => UserProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => UserAuthProvider()),
+      ],
       child: MaterialApp.router(
         title: 'Flutter Demo',
-        debugShowCheckedModeBanner:
-            false, // si volem veure o no el banner de debug
+        debugShowCheckedModeBanner: false,
         routerConfig: appRouter,
         theme: ThemeData(
           useMaterial3: true,
